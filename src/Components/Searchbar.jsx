@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./Component-Styles/Searchbar.css";
 import gamesList from "../testingData.json";
 import axios from "axios";
+const RAWG_API = import.meta.env.VITE_RAWG_API;
 
 const Searchbar = ({ list, setList, isUniversalSearch }) => {
   const [searchStr, setSearchStr] = useState("");
@@ -37,18 +38,41 @@ const Searchbar = ({ list, setList, isUniversalSearch }) => {
       // make an API Call and then
 
       clearTimeout(debounceTime);
-      debounceTime = setTimeout(() => {
+      debounceTime = setTimeout(async () => {
         if (searchValue.length < 3) {
           return;
         }
 
         // Make an API Call
 
-        // try {
-        //   const results = axios.get();
-        // } catch (error) {
-        //   console.log(error);
-        // }
+        try {
+          const response = await axios.get(
+            `https://api.rawg.io/api/games?key=${RAWG_API}&search=${searchValue}&page_size=5`
+          );
+
+          if (response.status != 200) {
+            console.log(
+              "There was an error in fetching data\n" +
+                response.status +
+                "\n" +
+                response
+            );
+            return;
+          }
+
+          const gameList = response.data.results;
+          let gamesArry = [];
+
+          gameList.map((game) => {
+            gamesArry.push({ title: game.name, imgUrl: game.background_image });
+            return;
+          });
+          setSearchBoxContent(gamesArry);
+
+          console.log(gameList);
+        } catch (error) {
+          console.log(error);
+        }
 
         console.log(searchValue);
         setShowSearchBox(true);
@@ -137,7 +161,7 @@ const Searchbar = ({ list, setList, isUniversalSearch }) => {
       </button>
       {showSearchBox && (
         <div className="w-full h-max max-h-64 overflow-y-auto scorllbar custom-scrollbar scrollbar-thumb-red-400 rounded-b-lg items-center transition-all bg-gray-600 absolute top-full left-0">
-          {gamesList.map((game) => {
+          {searchBoxContent.map((game) => {
             // searchbox content
             return (
               <div className="flex gap-2 py-2 px-6 hover:bg-gray-500 cursor-pointer transition-all">
