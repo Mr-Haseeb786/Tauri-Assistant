@@ -1,15 +1,24 @@
 import React, { useState } from "react";
 import "./Component-Styles/Searchbar.css";
+import gamesList from "../testingData.json";
 
-const Searchbar = ({ list, setList }) => {
+const Searchbar = ({ list, setList, isUniversalSearch = false }) => {
   const [searchStr, setSearchStr] = useState("");
+  const [showSearchBox, setShowSearchBox] = useState(true);
+
   let debounceTime;
 
   const searchGame = (e) => {
     const searchValue = e.currentTarget.value;
     console.log(searchValue.trim().toLowerCase());
 
-    if (searchValue) {
+    if (!searchValue) {
+      setList(list);
+      return;
+    }
+
+    if (!isUniversalSearch) {
+      // Search in Personal Catalog
       clearTimeout(debounceTime);
 
       debounceTime = setTimeout(() => {
@@ -22,13 +31,18 @@ const Searchbar = ({ list, setList }) => {
         setList(searchArr);
         console.log(searchArr);
       }, 700);
+      return;
     } else {
-      setList(list);
+      // Search on the internet
+      // make an API Call and then
+      // setShowSearchBox(true)
+      console.log("Universal Search");
+      return;
     }
   };
 
   return (
-    <div className="searchBox">
+    <div className="searchBox relative overflow-y-visible z-10">
       <input
         className="searchInput"
         type="text"
@@ -102,6 +116,25 @@ const Searchbar = ({ list, setList }) => {
           </defs>
         </svg>
       </button>
+      {showSearchBox && (
+        <div className="w-full h-56 rounded-lg items-center transition-all bg-red-400 absolute top-full left-0">
+          {gamesList.map((game) => {
+            //
+            return (
+              <div className="flex gap-2 my-2 p-2">
+                <div className="w-10 h-10">
+                  <img
+                    src={game.imgUrl}
+                    alt={game.title}
+                    className="object-cover h-full w-full"
+                  />
+                </div>
+                <div className="flex text-center">{game.title}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

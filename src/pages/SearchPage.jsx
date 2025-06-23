@@ -1,7 +1,6 @@
 import Searchbar from "@/Components/Searchbar";
 import React, { useState } from "react";
 import gamesList from "../testingData.json";
-import Card from "@/Components/Card";
 import { CardContent, Card as SmallCard } from "@/Components/ui/card";
 import {
   Carousel,
@@ -35,7 +34,7 @@ const SearchPage = () => {
         <Searchbar list={gameList} setList={setGameList} />
       </div>
       {/* Carasol */}
-      <div className="overflow-y-scroll pb-8 h-[38rem] scrollbar custom-scrollbar scrollbar-thumb-midnight-accent ">
+      <div className="overflow-y-scroll pb-32 lg:pb-8 h-[38rem]  scrollbar custom-scrollbar scrollbar-thumb-midnight-accent ">
         <div className="max-w-sm md:max-w-xl lg:max-w-4xl w-11/12 mx-auto mt-4 cursor-pointer">
           <Carousel
             plugins={[
