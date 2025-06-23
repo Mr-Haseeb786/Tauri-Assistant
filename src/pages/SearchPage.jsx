@@ -30,8 +30,12 @@ const SearchPage = () => {
 
   return (
     <section className="font-nacelle text-center">
-      <div className="max-w-md w-4/5 mx-auto mb-4">
-        <Searchbar list={gameList} setList={setGameList} />
+      <div className="max-w-xl w-4/5 mx-auto mb-4">
+        <Searchbar
+          list={gameList}
+          setList={setGameList}
+          isUniversalSearch={true}
+        />
       </div>
       {/* Carasol */}
       <div className="overflow-y-scroll pb-32 lg:pb-8 h-[38rem]  scrollbar custom-scrollbar scrollbar-thumb-midnight-accent ">

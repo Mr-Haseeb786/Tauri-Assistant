@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Component-Styles/Searchbar.css";
 import gamesList from "../testingData.json";
+import axios from "axios";
 
-const Searchbar = ({ list, setList, isUniversalSearch = false }) => {
+const Searchbar = ({ list, setList, isUniversalSearch }) => {
   const [searchStr, setSearchStr] = useState("");
-  const [showSearchBox, setShowSearchBox] = useState(true);
+  const [showSearchBox, setShowSearchBox] = useState(false);
+  const [searchBoxContent, setSearchBoxContent] = useState([]);
 
   let debounceTime;
 
-  const searchGame = (e) => {
-    const searchValue = e.currentTarget.value;
-    console.log(searchValue.trim().toLowerCase());
+  const searchGame = async (e) => {
+    const searchValue = e.currentTarget.value.trim().toLowerCase();
+    // console.log(searchValue.trim().toLowerCase());
 
     if (!searchValue) {
       setList(list);
@@ -23,9 +25,7 @@ const Searchbar = ({ list, setList, isUniversalSearch = false }) => {
 
       debounceTime = setTimeout(() => {
         const searchArr = list.filter((item) => {
-          return item.title
-            .toLowerCase()
-            .match(searchValue.trim().toLowerCase());
+          return item.title.toLowerCase().match(searchValue);
         });
 
         setList(searchArr);
@@ -35,8 +35,26 @@ const Searchbar = ({ list, setList, isUniversalSearch = false }) => {
     } else {
       // Search on the internet
       // make an API Call and then
-      // setShowSearchBox(true)
-      console.log("Universal Search");
+
+      clearTimeout(debounceTime);
+      debounceTime = setTimeout(() => {
+        if (searchValue.length < 3) {
+          return;
+        }
+
+        // Make an API Call
+
+        // try {
+        //   const results = axios.get();
+        // } catch (error) {
+        //   console.log(error);
+        // }
+
+        console.log(searchValue);
+        setShowSearchBox(true);
+      }, 900);
+
+      // console.log("Universal Search");
       return;
     }
   };
@@ -48,6 +66,7 @@ const Searchbar = ({ list, setList, isUniversalSearch = false }) => {
         type="text"
         placeholder="Search Games"
         onChange={(e) => searchGame(e)}
+        onBlur={(e) => setShowSearchBox(false)}
       />
       <button className="searchButton" aria-label="Search">
         <svg
@@ -117,19 +136,21 @@ const Searchbar = ({ list, setList, isUniversalSearch = false }) => {
         </svg>
       </button>
       {showSearchBox && (
-        <div className="w-full h-56 rounded-lg items-center transition-all bg-red-400 absolute top-full left-0">
+        <div className="w-full h-max max-h-64 overflow-y-auto scorllbar custom-scrollbar scrollbar-thumb-red-400 rounded-b-lg items-center transition-all bg-gray-600 absolute top-full left-0">
           {gamesList.map((game) => {
-            //
+            // searchbox content
             return (
-              <div className="flex gap-2 my-2 p-2">
-                <div className="w-10 h-10">
+              <div className="flex gap-2 py-2 px-6 hover:bg-gray-500 cursor-pointer transition-all">
+                <div className="w-12 h-12">
                   <img
                     src={game.imgUrl}
                     alt={game.title}
                     className="object-cover h-full w-full"
                   />
                 </div>
-                <div className="flex text-center">{game.title}</div>
+                <div className="flex items-center text-center">
+                  <h2>{game.title}</h2>
+                </div>
               </div>
             );
           })}

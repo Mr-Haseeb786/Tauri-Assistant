@@ -22,5 +22,13 @@
     "platforms": ["PC", "PS5", "XBOX", "Nintendo"],
     "releaseDate": "2/6/2024",
     "catalogType": "playing"
+  },
+  {
+    "id": 4,
+    "title": "The Witcher 3: Assassin of Kings and bawas",
+    "imgUrl": "https://sm.ign.com/ign_ap/cover/t/the-witche/the-witcher-2-assassins-of-kings-enhanced-edition_y4jk.jpg",
+    "platforms": ["PC", "PS5", "XBOX", "Nintendo"],
+    "releaseDate": "2/6/2024",
+    "catalogType": "playing"
   }
 ]

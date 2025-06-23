@@ -33,7 +33,11 @@ const HomePage = () => {
     <section className="font-nacelle text-center">
       HomePage
       <div className="max-w-full w-4/6 mx-auto my-auto mt-4">
-        <Searchbar list={filteredList} setList={setDisplayList} />
+        <Searchbar
+          list={filteredList}
+          setList={setDisplayList}
+          isUniversalSearch={false}
+        />
       </div>
       <article className="flex justify-between md:max-w-full lg:w-[55%] w-11/12 mx-auto my-auto mt-8">
         <Button
