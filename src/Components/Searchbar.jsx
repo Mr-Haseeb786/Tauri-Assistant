@@ -1,19 +1,38 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./Component-Styles/Searchbar.css";
-import gamesList from "../testingData.json";
 import axios from "axios";
+import BarLoading from "./BarLoading";
 const RAWG_API = import.meta.env.VITE_RAWG_API;
 
 const Searchbar = ({ list, setList, isUniversalSearch }) => {
   const [searchStr, setSearchStr] = useState("");
   const [showSearchBox, setShowSearchBox] = useState(false);
   const [searchBoxContent, setSearchBoxContent] = useState([]);
+  const suggestionsRef = useRef(null);
+  const [suggesLoading, setSuggesLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target)
+      ) {
+        setShowSearchBox(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   let debounceTime;
 
   const searchGame = async (e) => {
     const searchValue = e.currentTarget.value.trim().toLowerCase();
-    // console.log(searchValue.trim().toLowerCase());
 
     if (!searchValue) {
       setList(list);
@@ -37,6 +56,9 @@ const Searchbar = ({ list, setList, isUniversalSearch }) => {
       // Search on the internet
       // make an API Call and then
 
+      setShowSearchBox(true);
+      setSuggesLoading(true);
+
       clearTimeout(debounceTime);
       debounceTime = setTimeout(async () => {
         if (searchValue.length < 3) {
@@ -45,20 +67,12 @@ const Searchbar = ({ list, setList, isUniversalSearch }) => {
 
         // Make an API Call
 
+        let response = null;
+
         try {
-          const response = await axios.get(
+          response = await axios.get(
             `https://api.rawg.io/api/games?key=${RAWG_API}&search=${searchValue}&page_size=5`
           );
-
-          if (response.status != 200) {
-            console.log(
-              "There was an error in fetching data\n" +
-                response.status +
-                "\n" +
-                response
-            );
-            return;
-          }
 
           const gameList = response.data.results;
           let gamesArry = [];
@@ -70,15 +84,17 @@ const Searchbar = ({ list, setList, isUniversalSearch }) => {
           setSearchBoxContent(gamesArry);
 
           console.log(gameList);
+          setError("");
         } catch (error) {
           console.log(error);
+          setError(error.message);
+        } finally {
+          setSuggesLoading(false);
         }
 
         console.log(searchValue);
-        setShowSearchBox(true);
       }, 900);
 
-      // console.log("Universal Search");
       return;
     }
   };
@@ -90,7 +106,6 @@ const Searchbar = ({ list, setList, isUniversalSearch }) => {
         type="text"
         placeholder="Search Games"
         onChange={(e) => searchGame(e)}
-        onBlur={(e) => setShowSearchBox(false)}
       />
       <button className="searchButton" aria-label="Search">
         <svg
@@ -160,24 +175,42 @@ const Searchbar = ({ list, setList, isUniversalSearch }) => {
         </svg>
       </button>
       {showSearchBox && (
-        <div className="w-full h-max max-h-64 overflow-y-auto scorllbar custom-scrollbar scrollbar-thumb-red-400 rounded-b-lg items-center transition-all bg-gray-600 absolute top-full left-0">
-          {searchBoxContent.map((game) => {
-            // searchbox content
-            return (
-              <div className="flex gap-2 py-2 px-6 hover:bg-gray-500 cursor-pointer transition-all">
-                <div className="w-12 h-12">
-                  <img
-                    src={game.imgUrl}
-                    alt={game.title}
-                    className="object-cover h-full w-full"
-                  />
-                </div>
-                <div className="flex items-center text-center">
-                  <h2>{game.title}</h2>
-                </div>
-              </div>
-            );
-          })}
+        <div
+          className="w-full h-max max-h-64 overflow-y-auto scorllbar custom-scrollbar scrollbar-thumb-red-400 rounded-b-lg items-center transition-all bg-gray-600 absolute top-full left-0"
+          ref={suggestionsRef}
+        >
+          {suggesLoading ? (
+            <div className="flex items-center justify-center my-2 w-full h-16 bg-transparent">
+              <BarLoading />
+            </div>
+          ) : searchBoxContent.length > 0 ? (
+            searchBoxContent.map((game) => {
+              return (
+                <a
+                  href="#"
+                  className="flex gap-2 py-2 px-6 hover:bg-gray-500 cursor-pointer transition-all"
+                >
+                  <div className="w-12 h-12">
+                    <img
+                      src={game.imgUrl}
+                      alt={game.title}
+                      className="object-cover h-full w-full"
+                    />
+                  </div>
+                  <div className="flex items-center text-center">
+                    <h2>{game.title}</h2>
+                  </div>
+                </a>
+              );
+            })
+          ) : (
+            <div className="py-4">
+              <h2>
+                No Games Found:{" "}
+                <span className="italic text-red-500">{error}</span>
+              </h2>
+            </div>
+          )}
         </div>
       )}
     </div>
