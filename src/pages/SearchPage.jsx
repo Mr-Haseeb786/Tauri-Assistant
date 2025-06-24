@@ -1,5 +1,5 @@
 import Searchbar from "@/Components/Searchbar";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import gamesList from "../testingData.json";
 import { CardContent, Card as SmallCard } from "@/Components/ui/card";
 import {
@@ -11,11 +11,140 @@ import {
 } from "@/Components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import TooltipMenu from "@/Components/TooltipMenu";
-import { Button } from "@/Components/ui/button";
+import {
+  fetchGames,
+  formatDate,
+  formatToShortGamesArray,
+  getTodayAndOneMonthAgoDates,
+} from "@/lib/utils";
+import { useAppContext } from "@/Context/AppContext";
 
 const SearchPage = () => {
   const [gameList, setGameList] = useState(gamesList);
-  const [isHovered, setIsHovered] = useState(false);
+  const [carouselList, setCarouselList] = useState([]);
+  const [topCharts, setTopCharts] = useState([]);
+  const [topReleases, setTopRelease] = useState([]);
+  const [topIndie, setTopIndie] = useState([]);
+  const [topUpcoming, setTopUpcoming] = useState([]);
+  const { theme } = useAppContext();
+
+  console.log("Search Page");
+  console.log(topCharts);
+  console.log(topIndie);
+  console.log(topReleases);
+  console.log(topUpcoming);
+
+  useEffect(() => {
+    console.log("Rn");
+    // First and foremost check the internet connection before making API Calls
+
+    const fetchCarouselGames = async () => {
+      console.log("Fetching Carousel");
+
+      const { formatedDate, oneMonthFormattedDate } =
+        getTodayAndOneMonthAgoDates();
+
+      const { response, error } = await fetchGames(
+        `page_size=8&dates=${oneMonthFormattedDate},${formatedDate}&ordering=-rating`
+      );
+
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+      console.log(response);
+
+      const carouselArry = formatToShortGamesArray(response);
+
+      setCarouselList(carouselArry);
+
+      return;
+    };
+
+    const fetchTopChartsGames = async () => {
+      const { response, error } = await fetchGames(
+        `page_size=10&ordering=-rating`
+      );
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+      console.log(response);
+
+      const topChartsArry = formatToShortGamesArray(response);
+
+      setTopCharts(topChartsArry);
+
+      // set()
+    };
+
+    const fetchTopReleasesGames = async () => {
+      const { formatedDate, oneMonthFormattedDate } =
+        getTodayAndOneMonthAgoDates();
+
+      const { response, error } = await fetchGames(
+        `page_size=10&dates=${oneMonthFormattedDate},${formatedDate}&ordering=-released`
+      );
+
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+      const topReleasesArry = formatToShortGamesArray(response);
+      setTopRelease(topReleasesArry);
+    };
+    const fetchTopIndieGames = async () => {
+      const today = new Date();
+      const todayDate = formatDate(today);
+      today.setFullYear(today.getFullYear() - 1);
+      const oneYearAgo = formatDate(today);
+
+      const { response, error } = await fetchGames(
+        `page_size=10&genres=indie&dates=${oneYearAgo},${todayDate}&ordering=-rating`
+      );
+
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+      console.log(response);
+
+      const topIndieArry = formatToShortGamesArray(response);
+      setTopIndie(topIndieArry);
+    };
+
+    const fetchTopUpcomingGames = async () => {
+      const today = new Date();
+      const todayFomratted = formatDate(today);
+
+      today.setFullYear(today.getFullYear() + 1);
+      const oneYearAfter = formatDate(today);
+
+      const { response, error } = await fetchGames(
+        `page_size=10&dates=${todayFomratted},${oneYearAfter}&ordering=released`
+      );
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+      console.log(response);
+
+      const topUpcomingArry = formatToShortGamesArray(response);
+      setTopUpcoming(topUpcomingArry);
+    };
+
+    // fetchCarouselGames();
+    // fetchTopChartsGames();
+    // fetchTopReleasesGames();
+    // fetchTopIndieGames();
+    fetchTopUpcomingGames();
+  }, []);
+
   const testingCarousel = [
     {
       url: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1222140/capsule_616x353.jpg?t=1667468479",
@@ -37,7 +166,7 @@ const SearchPage = () => {
           isUniversalSearch={true}
         />
       </div>
-      {/* Carasol */}
+      {/* Carousel */}
       <div className="overflow-y-scroll pb-32 lg:pb-8 h-[38rem]  scrollbar custom-scrollbar scrollbar-thumb-midnight-accent ">
         <div className="max-w-sm md:max-w-xl lg:max-w-4xl w-11/12 mx-auto mt-4 cursor-pointer">
           <Carousel
@@ -50,23 +179,25 @@ const SearchPage = () => {
             ]}
           >
             <CarouselContent>
-              {testingCarousel.map((game, i) => {
-                const src = game.url;
+              {carouselList.map((game, i) => {
+                const { title, imgUrl, platforms } = game;
+
+                console.log(platforms);
                 return (
                   <CarouselItem>
-                    <a href={src}>
+                    <a href={imgUrl}>
                       <div
                         className="h-64 md:h-96 w-full bg-transparent overflow-hidden relative group"
                         key={i}
                       >
                         <img
                           className="w-full h-full rounded-lg object-cover"
-                          src={src}
-                          alt=""
+                          src={imgUrl}
+                          alt={title}
                         />
                         <div className="w-full h-[50%] absolute rounded-b-lg bg-transparent backdrop-blur-lg bottom-0 left-0 translate-y-56 group-hover:translate-y-0 transition-all">
-                          <h1>Title</h1>
-                          <span></span>
+                          <h1>{title}</h1>
+                          <span>{platforms.map((plt) => `${plt}`)}</span>
                         </div>
                       </div>
                     </a>
@@ -90,7 +221,92 @@ const SearchPage = () => {
               className="w-full max-w-4xl"
             >
               <CarouselContent>
-                {gameList.map((game, index) => {
+                {topCharts.map((game, index) => {
+                  const { id } = gameList;
+                  return (
+                    <CarouselItem
+                      key={id}
+                      className="md:basis-1/2 lg:basis-1/5"
+                    >
+                      <SmallCardComp item={game} />
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </article>
+
+          {/* Top Releases */}
+          <article className="mt-12 cursor-default">
+            <h2 className="mb-4 text-left text-3xl font-bold text-charcoal-accent">
+              Top Releases
+            </h2>
+            <Carousel
+              opts={{
+                align: "start",
+              }}
+              className="w-full max-w-4xl"
+            >
+              <CarouselContent>
+                {topReleases.map((game, index) => {
+                  const { id } = gameList;
+                  return (
+                    <CarouselItem
+                      key={id}
+                      className="md:basis-1/2 lg:basis-1/5"
+                    >
+                      <SmallCardComp item={game} />
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </article>
+          {/* Top Indie Games */}
+          <article className="mt-12 cursor-default">
+            <h2 className="mb-4 text-left text-3xl font-bold text-charcoal-accent">
+              Top Indie Games
+            </h2>
+            <Carousel
+              opts={{
+                align: "start",
+              }}
+              className="w-full max-w-4xl"
+            >
+              <CarouselContent>
+                {topIndie.map((game, index) => {
+                  const { id } = gameList;
+                  return (
+                    <CarouselItem
+                      key={id}
+                      className="md:basis-1/2 lg:basis-1/5"
+                    >
+                      <SmallCardComp item={game} />
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </article>
+          {/* Top Upcoming Games */}
+          <article className="mt-12 cursor-default">
+            <h2 className="mb-4 text-left text-3xl font-bold text-charcoal-accent">
+              Top Upcoming Games
+            </h2>
+            <Carousel
+              opts={{
+                align: "start",
+              }}
+              className="w-full max-w-4xl"
+            >
+              <CarouselContent>
+                {topUpcoming.map((game, index) => {
                   const { id } = gameList;
                   return (
                     <CarouselItem
@@ -117,7 +333,6 @@ const SearchPage = () => {
 const SmallCardComp = ({ item }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { id, title, imgUrl } = item;
-  console.log(item);
 
   return (
     <div className="p-1">
