@@ -171,6 +171,10 @@
     background-color: var(--color-midnight-accent);
   }
 
+  .midnight h2 {
+    @apply text-midnight-accent;
+  }
+
   .midnight .sidebar {
     @apply shadow-midnight-accent;
   }
@@ -203,6 +207,10 @@
     background-color: var(--color-charcoal-accent);
   }
 
+  .charcoal h2 {
+    @apply text-charcoal-accent;
+  }
+
   .charcoal .sidebar {
     @apply shadow-charcoal-accent;
   }
@@ -231,6 +239,10 @@
 
   .noir .accent-bg {
     background-color: var(--color-noir-accent);
+  }
+
+  .noir h2 {
+    @apply text-noir-accent;
   }
 
   .noir .sidebar {
