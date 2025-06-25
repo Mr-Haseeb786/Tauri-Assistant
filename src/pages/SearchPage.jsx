@@ -12,12 +12,14 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import TooltipMenu from "@/Components/TooltipMenu";
 import {
+  delay,
   fetchGames,
   formatDate,
   formatToShortGamesArray,
   getTodayAndOneMonthAgoDates,
 } from "@/lib/utils";
 import { useAppContext } from "@/Context/AppContext";
+import SpinLoader from "@/Components/SpinLoader";
 
 const SearchPage = () => {
   const [gameList, setGameList] = useState(gamesList);
@@ -26,6 +28,7 @@ const SearchPage = () => {
   const [topReleases, setTopRelease] = useState([]);
   const [topIndie, setTopIndie] = useState([]);
   const [topUpcoming, setTopUpcoming] = useState([]);
+  const [loadingMain, setLoadingMain] = useState(false);
   const { theme } = useAppContext();
 
   console.log("Search Page");
@@ -35,11 +38,9 @@ const SearchPage = () => {
   console.log(topUpcoming);
 
   useEffect(() => {
-    console.log("Rn");
     // First and foremost check the internet connection before making API Calls
-
     const fetchCarouselGames = async () => {
-      console.log("Fetching Carousel");
+      setLoadingMain(true);
 
       const { formatedDate, oneMonthFormattedDate } =
         getTodayAndOneMonthAgoDates();
@@ -63,9 +64,12 @@ const SearchPage = () => {
     };
 
     const fetchTopChartsGames = async () => {
+      // setLoadingMain(true);
+
       const { response, error } = await fetchGames(
         `page_size=10&ordering=-rating`
       );
+
       if (error) {
         console.log(error);
         return;
@@ -79,6 +83,8 @@ const SearchPage = () => {
 
       // set()
     };
+
+    console.log(loadingMain);
 
     const fetchTopReleasesGames = async () => {
       const { formatedDate, oneMonthFormattedDate } =
@@ -138,11 +144,29 @@ const SearchPage = () => {
       setTopUpcoming(topUpcomingArry);
     };
 
+    setLoadingMain(true);
+
+    const callingFn = async () => {
+      setLoadingMain(true);
+      // await delay(3000);
+      console.log("CAlling");
+      // await fetchCarouselGames();
+      // await fetchTopChartsGames();
+      // await fetchTopReleasesGames();
+      // await fetchTopIndieGames();
+      // await fetchTopUpcomingGames();
+      setLoadingMain(false);
+    };
+
+    callingFn();
+
     // fetchCarouselGames();
     // fetchTopChartsGames();
     // fetchTopReleasesGames();
     // fetchTopIndieGames();
-    fetchTopUpcomingGames();
+    // fetchTopUpcomingGames();
+
+    // setLoadingMain(false);
   }, []);
 
   const testingCarousel = [
@@ -164,167 +188,171 @@ const SearchPage = () => {
           list={gameList}
           setList={setGameList}
           isUniversalSearch={true}
+          loading={loadingMain}
         />
       </div>
-      {/* Carousel */}
       <div className="overflow-y-scroll pb-32 lg:pb-8 h-[38rem]  scrollbar custom-scrollbar scrollbar-thumb-midnight-accent ">
-        <div className="max-w-sm md:max-w-xl lg:max-w-4xl w-11/12 mx-auto mt-4 cursor-pointer">
-          <Carousel
-            plugins={[
-              Autoplay({
-                delay: 4000,
-                stopOnInteraction: false,
-                stopOnMouseEnter: true,
-              }),
-            ]}
-          >
-            <CarouselContent>
-              {carouselList.map((game, i) => {
-                const { title, imgUrl, platforms } = game;
+        {/* Carousel */}
 
-                console.log(platforms);
-                return (
-                  <CarouselItem>
-                    <a href={imgUrl}>
-                      <div
-                        className="h-64 md:h-96 w-full bg-transparent overflow-hidden relative group"
-                        key={i}
-                      >
-                        <img
-                          className="w-full h-full rounded-lg object-cover"
-                          src={imgUrl}
-                          alt={title}
-                        />
-                        <div className="w-full h-[50%] absolute rounded-b-lg bg-transparent backdrop-blur-lg bottom-0 left-0 translate-y-56 group-hover:translate-y-0 transition-all">
-                          <h1>{title}</h1>
-                          <span>{platforms.map((plt) => `${plt}`)}</span>
+        {loadingMain ? (
+          <SpinLoader />
+        ) : (
+          <div className="max-w-sm md:max-w-xl lg:max-w-4xl w-11/12 mx-auto mt-4 cursor-pointer">
+            <Carousel
+              plugins={[
+                Autoplay({
+                  delay: 4000,
+                  stopOnInteraction: false,
+                  stopOnMouseEnter: true,
+                }),
+              ]}
+            >
+              <CarouselContent>
+                {carouselList.map((game, i) => {
+                  const { title, imgUrl, platforms } = game;
+
+                  console.log(platforms);
+                  return (
+                    <CarouselItem>
+                      <a href={imgUrl}>
+                        <div
+                          className="h-64 md:h-96 w-full bg-transparent overflow-hidden relative group"
+                          key={i}
+                        >
+                          <img
+                            className="w-full h-full rounded-lg object-cover"
+                            src={imgUrl}
+                            alt={title}
+                          />
+                          <div className="w-full h-[50%] absolute rounded-b-lg bg-transparent backdrop-blur-lg bottom-0 left-0 translate-y-56 group-hover:translate-y-0 transition-all">
+                            <h1>{title}</h1>
+                            <span>{platforms.map((plt) => `${plt}`)}</span>
+                          </div>
                         </div>
-                      </div>
-                    </a>
-                  </CarouselItem>
-                );
-              })}
-            </CarouselContent>
-            <CarouselNext />
-            <CarouselPrevious />
-          </Carousel>
+                      </a>
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+              <CarouselNext />
+              <CarouselPrevious />
+            </Carousel>
 
-          {/* Top Charts */}
-          <article className="mt-12 cursor-default">
-            <h2 className="mb-4 text-left text-3xl font-bold text-charcoal-accent">
-              Top Charts
-            </h2>
-            <Carousel
-              opts={{
-                align: "start",
-              }}
-              className="w-full max-w-4xl"
-            >
-              <CarouselContent>
-                {topCharts.map((game, index) => {
-                  const { id } = gameList;
-                  return (
-                    <CarouselItem
-                      key={id}
-                      className="md:basis-1/2 lg:basis-1/5"
-                    >
-                      <SmallCardComp item={game} />
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
-          </article>
+            {/* Top Charts */}
+            <article className="mt-12 cursor-default">
+              <h2 className="mb-4 text-left text-3xl font-bold text-charcoal-accent">
+                Top Charts
+              </h2>
+              <Carousel
+                opts={{
+                  align: "start",
+                }}
+                className="w-full max-w-4xl"
+              >
+                <CarouselContent>
+                  {topCharts.map((game, index) => {
+                    const { id } = gameList;
+                    return (
+                      <CarouselItem
+                        key={id}
+                        className="md:basis-1/2 lg:basis-1/5"
+                      >
+                        <SmallCardComp item={game} />
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </article>
 
-          {/* Top Releases */}
-          <article className="mt-12 cursor-default">
-            <h2 className="mb-4 text-left text-3xl font-bold text-charcoal-accent">
-              Top Releases
-            </h2>
-            <Carousel
-              opts={{
-                align: "start",
-              }}
-              className="w-full max-w-4xl"
-            >
-              <CarouselContent>
-                {topReleases.map((game, index) => {
-                  const { id } = gameList;
-                  return (
-                    <CarouselItem
-                      key={id}
-                      className="md:basis-1/2 lg:basis-1/5"
-                    >
-                      <SmallCardComp item={game} />
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
-          </article>
-          {/* Top Indie Games */}
-          <article className="mt-12 cursor-default">
-            <h2 className="mb-4 text-left text-3xl font-bold text-charcoal-accent">
-              Top Indie Games
-            </h2>
-            <Carousel
-              opts={{
-                align: "start",
-              }}
-              className="w-full max-w-4xl"
-            >
-              <CarouselContent>
-                {topIndie.map((game, index) => {
-                  const { id } = gameList;
-                  return (
-                    <CarouselItem
-                      key={id}
-                      className="md:basis-1/2 lg:basis-1/5"
-                    >
-                      <SmallCardComp item={game} />
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
-          </article>
-          {/* Top Upcoming Games */}
-          <article className="mt-12 cursor-default">
-            <h2 className="mb-4 text-left text-3xl font-bold text-charcoal-accent">
-              Top Upcoming Games
-            </h2>
-            <Carousel
-              opts={{
-                align: "start",
-              }}
-              className="w-full max-w-4xl"
-            >
-              <CarouselContent>
-                {topUpcoming.map((game, index) => {
-                  const { id } = gameList;
-                  return (
-                    <CarouselItem
-                      key={id}
-                      className="md:basis-1/2 lg:basis-1/5"
-                    >
-                      <SmallCardComp item={game} />
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
-          </article>
-        </div>
-
-        {/* Top Charts */}
+            {/* Top Releases */}
+            <article className="mt-12 cursor-default">
+              <h2 className="mb-4 text-left text-3xl font-bold text-charcoal-accent">
+                Top Releases
+              </h2>
+              <Carousel
+                opts={{
+                  align: "start",
+                }}
+                className="w-full max-w-4xl"
+              >
+                <CarouselContent>
+                  {topReleases.map((game, index) => {
+                    const { id } = gameList;
+                    return (
+                      <CarouselItem
+                        key={id}
+                        className="md:basis-1/2 lg:basis-1/5"
+                      >
+                        <SmallCardComp item={game} />
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </article>
+            {/* Top Indie Games */}
+            <article className="mt-12 cursor-default">
+              <h2 className="mb-4 text-left text-3xl font-bold text-charcoal-accent">
+                Top Indie Games
+              </h2>
+              <Carousel
+                opts={{
+                  align: "start",
+                }}
+                className="w-full max-w-4xl"
+              >
+                <CarouselContent>
+                  {topIndie.map((game, index) => {
+                    const { id } = gameList;
+                    return (
+                      <CarouselItem
+                        key={id}
+                        className="md:basis-1/2 lg:basis-1/5"
+                      >
+                        <SmallCardComp item={game} />
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </article>
+            {/* Top Upcoming Games */}
+            <article className="mt-12 cursor-default">
+              <h2 className="mb-4 text-left text-3xl font-bold text-charcoal-accent">
+                Top Upcoming Games
+              </h2>
+              <Carousel
+                opts={{
+                  align: "start",
+                }}
+                className="w-full max-w-4xl"
+              >
+                <CarouselContent>
+                  {topUpcoming.map((game, index) => {
+                    const { id } = gameList;
+                    return (
+                      <CarouselItem
+                        key={id}
+                        className="md:basis-1/2 lg:basis-1/5"
+                      >
+                        <SmallCardComp item={game} />
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </article>
+          </div>
+        )}
       </div>
     </section>
   );

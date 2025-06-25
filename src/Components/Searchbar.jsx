@@ -4,7 +4,7 @@ import axios from "axios";
 import BarLoading from "./BarLoading";
 const RAWG_API = import.meta.env.VITE_RAWG_API;
 
-const Searchbar = ({ list, setList, isUniversalSearch }) => {
+const Searchbar = ({ list, setList, isUniversalSearch, loading }) => {
   const [searchStr, setSearchStr] = useState("");
   const [showSearchBox, setShowSearchBox] = useState(false);
   const [searchBoxContent, setSearchBoxContent] = useState([]);
@@ -102,10 +102,11 @@ const Searchbar = ({ list, setList, isUniversalSearch }) => {
   return (
     <div className="searchBox relative overflow-y-visible z-10">
       <input
-        className="searchInput"
+        className={`searchInput ${loading && "cursor-not-allowed"}`}
         type="text"
         placeholder="Search Games"
         onChange={(e) => searchGame(e)}
+        disabled={loading}
       />
       <button className="searchButton" aria-label="Search">
         <svg
