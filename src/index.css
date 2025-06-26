@@ -155,6 +155,10 @@
   }
 }
 
+.test {
+  background-color: rgba(25, 25, 25, 0.3);
+}
+
 @layer utilities {
   /* =============== midnight =============== */
 
