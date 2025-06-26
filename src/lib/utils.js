@@ -62,6 +62,7 @@ export const formatToShortGamesArray = (arry) => {
     }
 
     shortArry.push({
+      id: game.id,
       title: game.name,
       imgUrl: game.background_image,
       platforms: platformsArry,

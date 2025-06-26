@@ -18,8 +18,8 @@ import {
   formatToShortGamesArray,
   getTodayAndOneMonthAgoDates,
 } from "@/lib/utils";
-import { useAppContext } from "@/Context/AppContext";
 import SpinLoader from "@/Components/SpinLoader";
+import { Link } from "react-router";
 
 const SearchPage = () => {
   const [gameList, setGameList] = useState(gamesList);
@@ -29,7 +29,6 @@ const SearchPage = () => {
   const [topIndie, setTopIndie] = useState([]);
   const [topUpcoming, setTopUpcoming] = useState([]);
   const [loadingMain, setLoadingMain] = useState(false);
-  const { theme } = useAppContext();
 
   console.log("Search Page");
   console.log(topCharts);
@@ -40,13 +39,13 @@ const SearchPage = () => {
   useEffect(() => {
     // First and foremost check the internet connection before making API Calls
     const fetchCarouselGames = async () => {
-      setLoadingMain(true);
-
       const { formatedDate, oneMonthFormattedDate } =
         getTodayAndOneMonthAgoDates();
 
+      console.log(formatedDate, oneMonthFormattedDate);
+
       const { response, error } = await fetchGames(
-        `page_size=8&dates=${oneMonthFormattedDate},${formatedDate}&ordering=-rating`
+        `page_size=8&dates=${`2024-06-26`},${formatedDate}&ordering=-rating`
       );
 
       if (error) {
@@ -64,8 +63,6 @@ const SearchPage = () => {
     };
 
     const fetchTopChartsGames = async () => {
-      // setLoadingMain(true);
-
       const { response, error } = await fetchGames(
         `page_size=10&ordering=-rating`
       );
@@ -149,7 +146,6 @@ const SearchPage = () => {
     const callingFn = async () => {
       setLoadingMain(true);
       // await delay(3000);
-      console.log("CAlling");
       // await fetchCarouselGames();
       // await fetchTopChartsGames();
       // await fetchTopReleasesGames();
@@ -250,7 +246,7 @@ const SearchPage = () => {
                 className="w-full max-w-4xl"
               >
                 <CarouselContent>
-                  {topCharts.map((game, index) => {
+                  {gamesList.map((game, index) => {
                     const { id } = gameList;
                     return (
                       <CarouselItem
@@ -363,7 +359,7 @@ const SmallCardComp = ({ item }) => {
   const { id, title, imgUrl } = item;
 
   return (
-    <div className="p-1">
+    <Link className="p-1" to={`/search/${id}`}>
       <SmallCard
         onMouseLeave={() => setIsHovered(false)}
         className={
@@ -400,7 +396,7 @@ const SmallCardComp = ({ item }) => {
           </div>
         )}
       </SmallCard>
-    </div>
+    </Link>
   );
 };
 

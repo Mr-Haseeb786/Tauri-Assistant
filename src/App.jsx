@@ -6,6 +6,7 @@ import SettingsPage from "./pages/SettingsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import Sidebar from "./Components/Sidebar";
 import { useAppContext } from "./Context/AppContext";
+import GameSlug from "./pages/GameSlug";
 
 function App() {
   const { theme, setTheme } = useAppContext();
@@ -20,6 +21,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/search/:game" element={<GameSlug />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
