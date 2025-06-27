@@ -1,28 +1,31 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import singleGame from "../../single_game_data.json";
 import ss from "../../ssData.json";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 import { Button } from "@/Components/ui/button";
 import SpinLoader from "@/Components/SpinLoader";
+import BarLoading from "@/Components/BarLoading";
 
 const RAWG_KEY = import.meta.env.VITE_RAWG_API;
 
 const GameSlug = () => {
-  const { id } = useParams();
+  const { game } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingScreenshots, setIsLoadingScreenshots] = useState(false);
   const [error, setError] = useState(false);
+  const [ssError, setSsError] = useState(false);
   const [gameData, setGameData] = useState({});
   const [screenshots, setScreenShots] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGameDetails = async () => {
       try {
         let { data } = await axios.get(
-          `https://https://api.rawg.io/api/games/${id}?key=${RAWG_KEY}`
+          `https://api.rawg.io/api/games/${game}?key=${RAWG_KEY}`
         );
 
         console.log(data);
@@ -36,7 +39,7 @@ const GameSlug = () => {
           parent_platforms,
         } = data;
 
-        let platformNames = null;
+        let platformNames = [];
 
         parent_platforms.map((plt) => {
           platformNames.push(plt.platform.name);
@@ -46,10 +49,9 @@ const GameSlug = () => {
 
         platforms.map((plt) => {
           if (plt.platform.name === "PC") {
-            requirements = plt.platform.requirements.minimum;
+            requirements = plt.requirements.minimum;
             return;
           }
-          console.log("PLT not found");
         });
 
         setGameData({
@@ -71,8 +73,10 @@ const GameSlug = () => {
     const fetchScreenShots = async () => {
       try {
         const { data } = await axios.get(
-          `https://https://api.rawg.io/api/games/${id}/screenshots?key=${RAWG_KEY}`
+          `https://api.rawg.io/api/games/${game}/screenshots?key=${RAWG_KEY}`
         );
+
+        console.log(data);
 
         let screenshotsArry = [];
 
@@ -87,12 +91,12 @@ const GameSlug = () => {
       }
     };
 
-    function callingFn() {
+    async function callingFn() {
       setIsLoading(true);
-      // fetchGameDetails();
+      await fetchGameDetails();
       setIsLoading(false);
       setIsLoadingScreenshots(true);
-      // fetchScreenShots();
+      await fetchScreenShots();
       setIsLoadingScreenshots(false);
     }
 
@@ -102,61 +106,73 @@ const GameSlug = () => {
   const {
     name,
     description,
+    requirements,
     description_raw,
     released,
     background_image,
     platforms,
-    parent_platforms,
-  } = singleGame;
+  } = gameData;
 
-  let platformNames = [];
-
-  parent_platforms.map((plt) => {
-    platformNames.push(plt.platform.name);
-  });
-
-  let requirements = "";
   let dateFormat = "";
 
   if (released) {
     dateFormat = released.split("-").reverse().join("/");
-    // dateFormat =
   }
 
-  platforms.map((plt) => {
-    if (plt.platform.name === "PC") {
-      requirements = plt.requirements.minimum;
-      return;
-    }
-  });
-
-  let test = "Hey there\nHow are you doing";
-  let charArry = test.split("\n");
-
-  charArry.map((str) => {
-    console.log(str);
-  });
+  // platforms.map((plt) => {
+  //   if (plt.platform.name === "PC") {
+  //     pcRequirements = plt.requirements.minimum;
+  //     return;
+  //   }
+  // });
 
   let screenshotsArry = [];
 
-  ss.results.map((ss) => {
-    screenshotsArry.push({ id: ss.id, imgUrl: ss.image });
-  });
+  // ss.results.map((ss) => {
+  //   screenshotsArry.push({ id: ss.id, imgUrl: ss.image });
+  // });
 
   return (
-    <section className="h-[40rem] pb-18 scrollbar scrollbar-thumb-gray-700 overflow-y-auto custom-scrollbar">
+    <section className="h-[40rem] pb-18 scrollbar scrollbar-thumb-gray-700 overflow-y-auto custom-scrollbar relative">
       <h2 className="text-3xl font-bold text-center mt-4">Game Information</h2>
+      <Button
+        className={
+          "fixed top-10 left-30 rounded-full border-1 border-midnight-accent accent-bg w-15 h-10"
+        }
+        onClick={() => {
+          navigate(-1);
+        }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+          <path
+            fill="#f0f8ff"
+            d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"
+          />
+        </svg>
+      </Button>
       {isLoading ? (
         <SpinLoader />
+      ) : error ? (
+        <div className="max-w-max w-full h-[30rem] align-middle flex mx-auto items-center">
+          <p className="text-4xl text-center text-gray-600 italic ">
+            There was an Error Loading the Page
+          </p>
+        </div>
       ) : (
         <>
           <article className="mt-20 flex gap-6 max-w-2xl mx-auto">
             <div className="w-52 h-52">
-              <img
-                className="object-cover w-full h-full"
-                src={background_image}
-                alt={name}
-              />
+              {background_image ? (
+                <img
+                  className="object-cover w-full h-full"
+                  src={background_image}
+                  alt={name}
+                />
+              ) : (
+                <div className="w-full h-full text-gray-600 text-sm italic flex items-center justify-center bg-gray-900">
+                  <p>No Image</p>
+                </div>
+              )}
             </div>
             <div>
               <h3 className="text-2xl">{name}</h3>
@@ -164,23 +180,35 @@ const GameSlug = () => {
               <h3 className="mt-1">Released: {dateFormat}</h3>
               <h3 className="mt-3">Available Platforms</h3>
               <div className="flex flex-wrap gap-2 mt-2 max-w-60">
-                {platformNames.map((plt, i) => {
-                  return (
-                    <p
-                      key={i}
-                      className="text-white text-xs bg-blue-400 w-max py-1 px-2 rounded-2xl cursor-default"
-                    >
-                      {plt}
-                    </p>
-                  );
-                })}
+                {platforms && platforms.length > 0 ? (
+                  platforms.map((plt, i) => {
+                    return (
+                      <p
+                        key={i}
+                        className="text-white text-xs bg-blue-400 w-max py-1 px-2 rounded-2xl cursor-default"
+                      >
+                        {plt}
+                      </p>
+                    );
+                  })
+                ) : (
+                  <p className="text-gray-600 italic text-xs">N/A</p>
+                )}
               </div>
             </div>
           </article>
 
           <article className="max-w-3xl mx-auto italic font-extralight text-sm text-left mt-12 px-4">
             <h2 className="text-xl font-bold not-italic mb-2">Description</h2>
-            <p>{description_raw}</p>
+            <p>
+              {description_raw ? (
+                description_raw
+              ) : (
+                <span className="text-center italic text-gray-600">
+                  No Description Found
+                </span>
+              )}
+            </p>
           </article>
 
           <article className="px-4">
@@ -193,43 +221,73 @@ const GameSlug = () => {
                 </tr>
               </thead>
               <tbody>
-                {requirements.split("\n").map((str, index) => {
-                  if (str.toLowerCase().match("minimum")) {
-                    return;
-                  }
-                  return (
-                    <tr key={index}>
-                      <td className="border border-slate-300 p-2">{str}</td>
-                    </tr>
-                  );
-                })}
+                {requirements ? (
+                  requirements.split("\n").map((str, index) => {
+                    if (str.toLowerCase().match("minimum")) {
+                      return;
+                    }
+                    return (
+                      <tr key={index}>
+                        <td className="border border-slate-300 p-2">{str}</td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td className="border border-slate-300 font-bold text-gray-600 p-2 italic text-center">
+                      Not Found Any
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </article>
 
           <article className="mt-12 px-12 max-w-4xl mx-auto">
-            <div className="flex flex-wrap gap-2">
-              <PhotoProvider>
-                {screenshots.map((obj) => {
-                  return (
-                    <PhotoView src={obj.imgUrl}>
-                      <div key={obj.id} className="w-sm cursor-pointer">
-                        <img
-                          src={obj.imgUrl}
-                          alt={obj.id}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    </PhotoView>
-                  );
-                })}
-              </PhotoProvider>
-            </div>
+            {isLoadingScreenshots ? (
+              <div className="flex flex-col items-center justify-center my-2 w-full h-16 bg-transparent">
+                <BarLoading />
+                <span className="text-gray-600 text-sm text-center pt-4">
+                  Loading Screenshots...
+                </span>
+              </div>
+            ) : ssError ? (
+              <div className="w-full mt-4">
+                <p className="text-2xl text-gray-600 text-center italic">
+                  Screenshots Not Available
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                <PhotoProvider>
+                  {screenshots.length > 0 ? (
+                    screenshots.map((obj) => {
+                      return (
+                        <PhotoView src={obj.imgUrl}>
+                          <div key={obj.id} className="w-sm cursor-pointer">
+                            <img
+                              src={obj.imgUrl}
+                              alt={obj.id}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        </PhotoView>
+                      );
+                    })
+                  ) : (
+                    <div className="w-full mt-4">
+                      <p className="text-2xl text-gray-600 text-center italic">
+                        Screenshots Not Available
+                      </p>
+                    </div>
+                  )}
+                </PhotoProvider>
+              </div>
+            )}
           </article>
 
           <article className="mx-auto max-w-3xl mt-8">
             <h2 className="mt-2 text-2xl font-bold">Useful Links</h2>
-
             <div className="max-w-xl mx-auto mt-4">
               <div className="flex justify-between items-center">
                 <h3>How long it usually takes to beat the Game</h3>

@@ -8,10 +8,15 @@ export function cn(...inputs) {
 }
 
 export const fetchGames = async (queryStr) => {
+  // check cached data
+  // if present and not expired return data; else continue below
+
   try {
     const response = await axios.get(
       `https://api.rawg.io/api/games?key=${RAWG_KEY}&${queryStr}`
     );
+
+    // set Cached Data
 
     return {
       response: response.data.results,

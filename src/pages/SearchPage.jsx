@@ -30,19 +30,11 @@ const SearchPage = () => {
   const [topUpcoming, setTopUpcoming] = useState([]);
   const [loadingMain, setLoadingMain] = useState(false);
 
-  console.log("Search Page");
-  console.log(topCharts);
-  console.log(topIndie);
-  console.log(topReleases);
-  console.log(topUpcoming);
-
   useEffect(() => {
     // First and foremost check the internet connection before making API Calls
     const fetchCarouselGames = async () => {
       const { formatedDate, oneMonthFormattedDate } =
         getTodayAndOneMonthAgoDates();
-
-      console.log(formatedDate, oneMonthFormattedDate);
 
       const { response, error } = await fetchGames(
         `page_size=8&dates=${`2024-06-26`},${formatedDate}&ordering=-rating`
@@ -80,8 +72,6 @@ const SearchPage = () => {
 
       // set()
     };
-
-    console.log(loadingMain);
 
     const fetchTopReleasesGames = async () => {
       const { formatedDate, oneMonthFormattedDate } =
@@ -146,7 +136,7 @@ const SearchPage = () => {
     const callingFn = async () => {
       setLoadingMain(true);
       // await delay(3000);
-      // await fetchCarouselGames();
+      await fetchCarouselGames();
       // await fetchTopChartsGames();
       // await fetchTopReleasesGames();
       // await fetchTopIndieGames();
@@ -205,12 +195,11 @@ const SearchPage = () => {
             >
               <CarouselContent>
                 {carouselList.map((game, i) => {
-                  const { title, imgUrl, platforms } = game;
+                  const { title, imgUrl, platforms, id } = game;
 
-                  console.log(platforms);
                   return (
                     <CarouselItem>
-                      <a href={imgUrl}>
+                      <Link to={`/search/${id}`}>
                         <div
                           className="h-64 md:h-96 w-full bg-transparent overflow-hidden relative group"
                           key={i}
@@ -225,7 +214,7 @@ const SearchPage = () => {
                             <span>{platforms.map((plt) => `${plt}`)}</span>
                           </div>
                         </div>
-                      </a>
+                      </Link>
                     </CarouselItem>
                   );
                 })}
@@ -246,7 +235,7 @@ const SearchPage = () => {
                 className="w-full max-w-4xl"
               >
                 <CarouselContent>
-                  {gamesList.map((game, index) => {
+                  {topCharts.map((game, index) => {
                     const { id } = gameList;
                     return (
                       <CarouselItem
