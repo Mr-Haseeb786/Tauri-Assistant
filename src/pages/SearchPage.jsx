@@ -136,7 +136,7 @@ const SearchPage = () => {
     const callingFn = async () => {
       setLoadingMain(true);
       // await delay(3000);
-      await fetchCarouselGames();
+      // await fetchCarouselGames();
       // await fetchTopChartsGames();
       // await fetchTopReleasesGames();
       // await fetchTopIndieGames();

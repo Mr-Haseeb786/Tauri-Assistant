@@ -10,7 +10,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const Popup = ({ children, headTitle, setIsOpen, isOpen }) => {
+const Popup = ({
+  children,
+  headTitle,
+  setIsOpen,
+  isOpen,
+  gamePath = null,
+  setGamePath = null,
+}) => {
   const [transitionClasses, setTransitionClasses] = useState(
     "opacity-0 translate-y-4"
   );
@@ -48,6 +55,9 @@ const Popup = ({ children, headTitle, setIsOpen, isOpen }) => {
           <Button
             className={"absolute top-0 right-0 bg-red-500"}
             onClick={() => {
+              if (gamePath) {
+                setGamePath("");
+              }
               setIsOpen(false);
             }}
           >
