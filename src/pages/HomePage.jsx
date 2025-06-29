@@ -1,7 +1,7 @@
 import Card from "@/Components/Card";
 import Searchbar from "@/Components/Searchbar";
 import { Button } from "@/Components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import gamesList from "../testingData.json";
 import Popup from "@/Components/Popup";
 import {
@@ -9,20 +9,39 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/Components/ui/select";
 import { open } from "@tauri-apps/plugin-dialog";
+import { readCatalog } from "@/lib/utils";
 
 const HomePage = () => {
+  const [gameList, setGameList] = useState([]);
   const [filterValue, setFilterValue] = useState("all");
-  const [gameList, setGameList] = useState(gamesList);
-  const [filteredList, setFilteredList] = useState(gamesList);
-  const [displayList, setDisplayList] = useState(filteredList);
+  const [filteredList, setFilteredList] = useState([]);
+  const [displayList, setDisplayList] = useState([]);
   const [openPopup, setOpenPopup] = useState(false);
   const [popupData, setPopupData] = useState({});
   const [gamePath, setGamePath] = useState("");
+  const [revalidate, setRevalidate] = useState(20);
+
+  console.log(gameList);
+
+  useEffect(() => {
+    const getCatalog = async () => {
+      const data = await readCatalog();
+      console.log(data);
+      setGameList(data);
+      // setFilteredList(data);
+      // setDisplayList(data);
+    };
+
+    const test = async () => {
+      await getCatalog();
+    };
+
+    test();
+  }, [revalidate]);
 
   const changeFilterValue = (e) => {
     const filter = e.currentTarget.value;
@@ -121,6 +140,7 @@ const HomePage = () => {
                 isInPersonalCatalog={true}
                 setOpenPopup={setOpenPopup}
                 setPopupData={setPopupData}
+                setRevalidate={setRevalidate}
               />
             );
           })
@@ -144,7 +164,7 @@ const HomePage = () => {
             <h2 className="font-bold">Game Title: </h2>
             <span>{popupData.title}</span>
           </div>
-          {/* <input type="file" className="w-full" /> */}
+
           <div className="mt-4">
             <h2 className="text-left font-bold">File Options</h2>
             <div className="flex justify-between items-center">

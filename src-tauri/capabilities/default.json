@@ -8,6 +8,25 @@
     "dialog:allow-open",
     "dialog:allow-save",
     "dialog:default",
-    "fs:default"
+    "fs:default",
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": ["$APPLOCALDATA/**"]
+    },
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": ["$APPLOCALDATA/**"]
+    },
+    {
+      "identifier": "fs:allow-create",
+      "allow": ["$APPLOCALDATA/**"]
+    },
+    {
+      "identifier": "fs:allow-exists",
+      "allow": ["$APPLOCALDATA/**"]
+    },
+    "fs:allow-applocaldata-read",
+    "fs:allow-applocaldata-write",
+    "core:path:allow-join"
   ]
 }

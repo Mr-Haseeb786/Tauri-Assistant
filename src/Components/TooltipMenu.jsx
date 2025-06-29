@@ -2,24 +2,21 @@ import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import gamesList from "../testingData.json";
+import { changeCatalogType } from "@/lib/utils";
 
-const TooltipMenu = ({ gameId }) => {
-  const [gameList, setGameList] = useState(gamesList);
+const TooltipMenu = ({ gameObj, setRevalidate, isInPersonalCatalog }) => {
+  const changeCatalogTypeHandler = async (e) => {
+    console.log("Tooltip menu \n" + gameObj);
 
-  const changeCatalogType = (e) => {
-    const game = gameList.find((game) => game.id === gameId);
-    console.log("Original \n" + JSON.stringify(game));
+    const newCatalogType = e.currentTarget.value;
 
-    if (!game) {
-      // first add to the list of games
-      console.log("Game not found in List");
-      return;
+    await changeCatalogType(gameObj, newCatalogType);
+
+    if (isInPersonalCatalog) {
+      setRevalidate(Math.ceil(Math.random() * 100));
     }
 
-    game.catalogType = e.currentTarget.value;
-    console.log("Modded \n" + JSON.stringify(game));
-
-    // save back into the json -- here comes in rust backend
+    return;
   };
 
   return (
@@ -30,7 +27,7 @@ const TooltipMenu = ({ gameId }) => {
             <Button
               className={"bg-transparent backdrop-blur-md"}
               value={"completed"}
-              onClick={(e) => changeCatalogType(e)}
+              onClick={(e) => changeCatalogTypeHandler(e)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +48,7 @@ const TooltipMenu = ({ gameId }) => {
           <TooltipTrigger asChild>
             <Button
               className={"bg-transparent backdrop-blur-md"}
-              onClick={(e) => changeCatalogType(e)}
+              onClick={(e) => changeCatalogTypeHandler(e)}
               value={"playing"}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -69,7 +66,7 @@ const TooltipMenu = ({ gameId }) => {
           <TooltipTrigger asChild>
             <Button
               className={"bg-transparent backdrop-blur-md"}
-              onClick={(e) => changeCatalogType(e)}
+              onClick={(e) => changeCatalogTypeHandler(e)}
               value={"planned"}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -87,7 +84,7 @@ const TooltipMenu = ({ gameId }) => {
           <TooltipTrigger asChild>
             <Button
               className={"bg-transparent backdrop-blur-md"}
-              onClick={(e) => changeCatalogType(e)}
+              onClick={(e) => changeCatalogTypeHandler(e)}
               value={"dropped"}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">

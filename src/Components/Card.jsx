@@ -10,6 +10,7 @@ const Card = ({
   isInPersonalCatalog = true,
   setOpenPopup,
   setPopupData,
+  setRevalidate,
 }) => {
   const { title, imgUrl, platforms, releaseDate, catalogType, id } = metaData;
   const [isHovered, setIsHovered] = useState(false);
@@ -122,7 +123,11 @@ const Card = ({
       </div>
       {isHovered && (
         <div className="absolute -bottom-10 left-0 bg-gray-700 rounded-sm z-10 bounce-in-down tooltip before:absolute before:-top-1.5 before:left-[40%] before:border-l-6 before:border-r-6 before:border-b-6 before:border-transparent before:border-b-gray-700">
-          <TooltipMenu gameId={id} />
+          <TooltipMenu
+            gameObj={metaData}
+            setRevalidate={setRevalidate}
+            isInPersonalCatalog={isInPersonalCatalog}
+          />
         </div>
       )}
     </div>

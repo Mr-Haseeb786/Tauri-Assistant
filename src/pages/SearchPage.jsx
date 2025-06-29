@@ -320,7 +320,7 @@ const SearchPage = () => {
                 className="w-full max-w-4xl"
               >
                 <CarouselContent>
-                  {topUpcoming.map((game, index) => {
+                  {gamesList.map((game, index) => {
                     const { id } = gameList;
                     return (
                       <CarouselItem
@@ -346,46 +346,47 @@ const SearchPage = () => {
 const SmallCardComp = ({ item }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { id, title, imgUrl } = item;
+  console.log(item);
 
   return (
-    <Link className="p-1" to={`/search/${id}`}>
-      <SmallCard
-        onMouseLeave={() => setIsHovered(false)}
-        className={
-          "relative bg-amber-400 h-40 w-full cursor-pointer border border-noir-accent"
-        }
-      >
-        <CardContent className="w-full h-full relative overflow-hidden">
-          <div className="w-full h-full">
+    <SmallCard
+      onMouseLeave={() => setIsHovered(false)}
+      className={
+        "relative h-40 w-full cursor-pointer border border-noir-accent"
+      }
+    >
+      <CardContent className="w-full h-full relative overflow-hidden">
+        <div className="w-full h-full">
+          <Link to={`/search/${id}`}>
             <img
               className="object-cover w-full h-full rounded-xl"
               src={imgUrl}
               alt={title}
             />
-            <button
-              className={
-                "transition-all cursor-pointer rounded-sm absolute top-[50%] -translate-y-1/2 left-0 -translate-x-10/12 hover:translate-x-0 size-12 accent-bg hover:bg-transparent "
-              }
-              onClick={() => setIsHovered(true)}
-            >
-              <div className="p-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                  <path
-                    fill="#74C0FC"
-                    d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"
-                  />
-                </svg>
-              </div>
-            </button>
-          </div>
-        </CardContent>
-        {isHovered && (
-          <div className="absolute -bottom-0 left-0 bg-gray-700 rounded-sm z-10 bounce-in-down tooltip before:absolute before:-top-1.5 before:left-[40%] before:border-l-6 before:border-r-6 before:border-b-6 before:border-transparent before:border-b-gray-700">
-            <TooltipMenu gameId={item.id} />
-          </div>
-        )}
-      </SmallCard>
-    </Link>
+          </Link>
+          <button
+            className={
+              "transition-all cursor-pointer rounded-sm absolute top-[50%] -translate-y-1/2 left-0 -translate-x-10/12 hover:translate-x-0 size-12 accent-bg hover:bg-transparent "
+            }
+            onClick={() => setIsHovered(true)}
+          >
+            <div className="p-4">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <path
+                  fill="#74C0FC"
+                  d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </CardContent>
+      {isHovered && (
+        <div className="absolute -bottom-0 left-0 bg-gray-700 rounded-sm z-10 bounce-in-down tooltip before:absolute before:-top-1.5 before:left-[40%] before:border-l-6 before:border-r-6 before:border-b-6 before:border-transparent before:border-b-gray-700">
+          <TooltipMenu gameObj={item} />
+        </div>
+      )}
+    </SmallCard>
   );
 };
 

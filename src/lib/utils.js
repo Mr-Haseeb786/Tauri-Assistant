@@ -1,3 +1,5 @@
+import { appLocalDataDir, join } from "@tauri-apps/api/path";
+import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import axios from "axios";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -79,4 +81,102 @@ export const formatToShortGamesArray = (arry) => {
 
 export const delay = (time) => {
   return new Promise((resolve) => setTimeout(resolve, time));
+};
+
+export const checkFileExists = async (filename) => {
+  try {
+    const appDirPath = await appLocalDataDir();
+    const mainFolderPath = await join(appDirPath, "game_buddy_files");
+
+    const filePath = await join(mainFolderPath, filename);
+    const fileExists = await exists(filePath);
+
+    if (!fileExists) {
+      await writeTextFile(filePath);
+      console.log("file created\t" + filePath);
+    } else {
+      console.log("file present already");
+    }
+
+    return filePath;
+  } catch (error) {
+    console.log("There was an Error checking if the file exists\n" + error);
+    return;
+  }
+};
+
+export const changeCatalogType = async (gameObj, changeToType) => {
+  try {
+    const filePath = await checkFileExists("catalogData.json");
+    const fileContents = await readTextFile(filePath);
+    console.log("File Contents: \t " + fileContents);
+
+    if (!fileContents) {
+      const firstEntry = [
+        {
+          ...gameObj,
+          catalogType: changeToType,
+          syncOptions: {
+            mode: null,
+            saveFileLocation: null,
+          },
+        },
+      ];
+
+      await writeTextFile(filePath, JSON.stringify(firstEntry, null, 2));
+      return;
+    }
+
+    // fileContents Not empty
+    const fileContentsArry = JSON.parse(fileContents);
+    console.log(fileContentsArry);
+
+    let itemFound = false;
+
+    let newArry = fileContentsArry.map((game) => {
+      if (game.id === gameObj.id) {
+        game.catalogType = changeToType;
+        console.log("Match Found");
+        itemFound = true;
+      }
+      return game;
+    });
+
+    console.log(newArry);
+
+    if (!itemFound) {
+      newArry.push({
+        ...gameObj,
+        catalogType: changeToType,
+        syncOptions: {
+          mode: null,
+          saveFileLocation: null,
+        },
+      });
+      console.log("Item Not found and new added \n" + newArry);
+    }
+
+    await writeTextFile(filePath, JSON.stringify(newArry, null, 2));
+  } catch (error) {
+    console.log("There was an error changing\n" + error);
+  }
+};
+
+export const readCatalog = async () => {
+  try {
+    const dirPath = await appLocalDataDir();
+    const filePath = await join(dirPath, "game_buddy_files/catalogData.json");
+
+    const fileContents = await readTextFile(filePath);
+
+    if (!fileContents) {
+      console.log("Empty file");
+      return [];
+    }
+
+    console.log(fileContents);
+    return JSON.parse(fileContents);
+  } catch (error) {
+    console.log("There was an error: \n" + error);
+  }
 };
